@@ -2,7 +2,7 @@
 
 [![Java](https://img.shields.io/badge/Java-17-%23ED8B00)](https://openjdk.org/projects/jdk/17/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.1-%236DB33F)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-%23336791)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-%23336791)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-%232496ED)](https://www.docker.com/)
 
 Система мониторинга статусов таможенных деклараций с веб-интерфейсом и API для интеграции.
