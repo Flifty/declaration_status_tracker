@@ -33,7 +33,7 @@
 ### Требования
 - JDK 17+
 - Docker 20+
-- PostgreSQL 15+
+- PostgreSQL 17+
 
 ### Запуск через Docker
 ```bash
