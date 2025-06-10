@@ -1,0 +1,26 @@
+services:
+  customs-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/customs_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Figtebe2005
+      SPRING_JPA_HIBERNATE_USE-DISK-STORE: true
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17.4
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Figtebe2005
+      POSTGRES_DB: customs_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
