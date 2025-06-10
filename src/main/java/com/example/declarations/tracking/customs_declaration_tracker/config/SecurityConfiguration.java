@@ -21,9 +21,10 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/declarations").hasAuthority(Role.ROLE_DECLARANT)
+                        .requestMatchers(HttpMethod.POST, "/declarations").hasAnyAuthority(Role.ROLE_DECLARANT, Role.ROLE_ADMIN)
                         .requestMatchers(HttpMethod.PATCH, "/declarations/**").hasAnyAuthority(Role.ROLE_INSPECTOR, Role.ROLE_ADMIN)
                         .requestMatchers(HttpMethod.GET, "/declarations/**").permitAll()
+                        .requestMatchers("/sse/subscribe").hasAnyAuthority(Role.ROLE_INSPECTOR, Role.ROLE_ADMIN)
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .anyRequest().denyAll()

@@ -1,6 +1,5 @@
 package com.example.declarations.tracking.customs_declaration_tracker.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,13 +9,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeclarationDto {
-    @NotBlank
+public class StatusUpdateDto {
     private String number;
-
-    private String status;
-
-    private LocalDateTime createdAt;
-
+    private String oldStatus;
+    private String newStatus;
     private LocalDateTime updatedAt;
 }

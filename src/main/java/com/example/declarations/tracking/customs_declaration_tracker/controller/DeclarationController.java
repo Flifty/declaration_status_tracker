@@ -1,6 +1,6 @@
 package com.example.declarations.tracking.customs_declaration_tracker.controller;
 
-import com.example.declarations.tracking.customs_declaration_tracker.dto.CreateDeclarationRequest;
+import com.example.declarations.tracking.customs_declaration_tracker.dto.CreateDeclarationRequestDto;
 import com.example.declarations.tracking.customs_declaration_tracker.dto.DeclarationDto;
 import com.example.declarations.tracking.customs_declaration_tracker.exception.DeclarationNotFoundException;
 import com.example.declarations.tracking.customs_declaration_tracker.service.DeclarationService;
@@ -24,7 +24,7 @@ public class DeclarationController {
     @Operation(summary = "Создание новой декларации")
     @ApiResponse(responseCode = "200", description = "Успешное создание")
     @PreAuthorize("hasRole('DECLARANT') or hasRole('ADMIN')")
-    public ResponseEntity<DeclarationDto> createDeclaration(@RequestBody CreateDeclarationRequest request) {
+    public ResponseEntity<DeclarationDto> createDeclaration(@RequestBody CreateDeclarationRequestDto request) {
         DeclarationDto dto = declarationService.createDeclaration(request.getNumber(), request.getStatus());
         return ResponseEntity.ok(dto);
     }

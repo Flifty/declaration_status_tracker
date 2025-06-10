@@ -1,6 +1,7 @@
 package com.example.declarations.tracking.customs_declaration_tracker.service;
 
 import com.example.declarations.tracking.customs_declaration_tracker.dto.DeclarationDto;
+import com.example.declarations.tracking.customs_declaration_tracker.dto.StatusUpdateDto;
 import com.example.declarations.tracking.customs_declaration_tracker.entity.Declaration;
 import com.example.declarations.tracking.customs_declaration_tracker.exception.DeclarationNotFoundException;
 import com.example.declarations.tracking.customs_declaration_tracker.mapper.DeclarationMapper;
@@ -14,6 +15,7 @@ public class DeclarationService {
 
     private final DeclarationRepository declarationRepository;
     private final DeclarationMapper declarationMapper;
+    private final SseService sseService;
 
     public DeclarationDto getDeclaration(String number) {
         return declarationRepository.findByNumber(number)
@@ -39,9 +41,27 @@ public class DeclarationService {
         Declaration declaration = declarationRepository.findByNumber(number)
                 .orElseThrow(() -> new DeclarationNotFoundException("Declaration not found"));
 
+        String oldStatus = declaration.getStatus();
+
+        if (oldStatus.equals(newStatus)) {
+            return declarationMapper.toDto(declaration);
+        }
+
         declaration.setStatus(newStatus);
 
         declaration = declarationRepository.save(declaration);
-        return declarationMapper.toDto(declaration);
+        DeclarationDto dto = declarationMapper.toDto(declaration);
+
+        StatusUpdateDto event = StatusUpdateDto.builder()
+                .number(dto.getNumber())
+                .oldStatus(oldStatus)
+                .newStatus(dto.getStatus())
+                .updatedAt(dto.getUpdatedAt())
+                .build();
+
+        sseService.sendEventToUser("inspector", event);
+        sseService.sendEventToUser("admin", event);
+
+        return dto;
     }
 }
