@@ -15,24 +15,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @RequiredArgsConstructor
 public class DeclarationService {
+
+    private static final Logger log = LoggerFactory.getLogger(DeclarationService.class);
 
     private final DeclarationRepository declarationRepository;
     private final DeclarationMapper declarationMapper;
     private final SseService sseService;
 
     public DeclarationDto getDeclaration(String number) {
+        log.info("Получен запрос на получение декларации с номером {}", number);
         return declarationRepository.findByNumber(number)
                 .map(declarationMapper::toDto)
-                .orElseThrow(() -> new DeclarationNotFoundException("Declaration with number " + number + " not found"));
+                .orElseThrow(() -> new DeclarationNotFoundException("Декларация с номером " + number + " не найдена"));
     }
 
     public DeclarationDto createDeclaration(String number, String status) {
+        log.info("Получен запрос на создание декларации: {} | Статус: {}", number, status);
+
         if (declarationRepository.findByNumber(number).isPresent()) {
-            throw new IllegalArgumentException("Declaration with number " + number + " already exists");
+            log.warn("Попытка создать дублирующую декларацию с номером {}", number);
+            throw new IllegalArgumentException("Декларация с номером " + number + " уже существует");
         }
 
         Declaration declaration = Declaration.builder()
@@ -41,21 +49,24 @@ public class DeclarationService {
                 .build();
 
         declaration = declarationRepository.save(declaration);
+        log.info("Декларация {} успешно создана", number);
         return declarationMapper.toDto(declaration);
     }
 
     public DeclarationDto updateDeclaration(String number, String newStatus) {
+        log.info("Получен запрос на обновление статуса декларации {}: {}", number, newStatus);
+
         Declaration declaration = declarationRepository.findByNumber(number)
-                .orElseThrow(() -> new DeclarationNotFoundException("Declaration not found"));
+                .orElseThrow(() -> new DeclarationNotFoundException("Декларация с номером " + number + " не найдена"));
 
         String oldStatus = declaration.getStatus();
 
         if (oldStatus.equals(newStatus)) {
+            log.debug("Статус декларации {} не изменился", number);
             return declarationMapper.toDto(declaration);
         }
 
         declaration.setStatus(newStatus);
-
         declaration = declarationRepository.save(declaration);
         DeclarationDto dto = declarationMapper.toDto(declaration);
 
@@ -66,6 +77,8 @@ public class DeclarationService {
                 .updatedAt(dto.getUpdatedAt())
                 .build();
 
+        log.info("Статус декларации {} изменён с {} на {}", number, oldStatus, newStatus);
+
         sseService.sendEventToUser("inspector", event);
         sseService.sendEventToUser("admin", event);
 
@@ -73,14 +86,22 @@ public class DeclarationService {
     }
 
     public Page<DeclarationDto> findDeclarations(DeclarationFilterDto filter) {
-        Pageable pageable = PageRequest.of(
-                filter.getPage(),
-                filter.getSize(),
-                Sort.by(filter.getSortDirection(), filter.getSortBy())
-        );
+        log.info("Получен запрос на получение списка деклараций с фильтром: {}", filter);
 
-        Specification<Declaration> spec = DeclarationSpecification.combined(filter);
-        Page<Declaration> declarations = declarationRepository.findAll(spec, pageable);
-        return declarations.map(declarationMapper::toDto);
+        try {
+            Pageable pageable = PageRequest.of(
+                    filter.getPage(),
+                    filter.getSize(),
+                    Sort.by(filter.getSortDirection(), filter.getSortBy())
+            );
+
+            Specification<Declaration> spec = DeclarationSpecification.combined(filter);
+            Page<Declaration> declarations = declarationRepository.findAll(spec, pageable);
+            return declarations.map(declarationMapper::toDto);
+
+        } catch (Exception e) {
+            log.error("Ошибка при получении списка деклараций", e);
+            throw new DeclarationNotFoundException("Не удалось получить список деклараций");
+        }
     }
 }

@@ -1,10 +1,12 @@
 package com.example.declarations.tracking.customs_declaration_tracker.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 public class DeclarationFilterDto {
     private String number;
@@ -13,8 +15,8 @@ public class DeclarationFilterDto {
     private LocalDateTime createdAtTo;
     private LocalDateTime updatedAtFrom;
     private LocalDateTime updatedAtTo;
-    private int page = 0;
-    private int size = 20;
-    private String sortBy = "createdAt";
-    private Sort.Direction sortDirection = Sort.Direction.DESC;
+    private int page;
+    private int size;
+    private String sortBy;
+    private Sort.Direction sortDirection;
 }
